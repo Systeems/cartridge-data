@@ -31,8 +31,18 @@ Cualquier lectura puramente numérica se rechaza. Aunque el lector apunte al có
 Cada lectura muestra el número de serie, su fecha de fabricación y un veredicto:
 
 - **Verde**: aceptado, pitido agudo corto.
-- **Ámbar**: repetido, doble pitido, indica cuándo se escaneó la primera vez. No se añade.
+- **Ámbar**: repetido, doble pitido. Distingue si ya está en la hoja actual o si viene de un lote anterior, e indica cuándo entró. No se añade.
 - **Rojo**: P/N o lectura incompleta, pitido grave. No se añade.
+
+## Trabajo por lotes
+
+El campo **Lote** etiqueta la tanda en curso (el P/N del modelo, por ejemplo) y se guarda en cada fila y en el nombre del CSV.
+
+**Exportar no borra nada**: descarga el archivo y la hoja sigue intacta. Para pasar al modelo siguiente está **Cerrar lote y vaciar hoja**, que vacía la tabla y el contador.
+
+Al cerrar un lote, los seriales no se olvidan: pasan a una memoria aparte (`cartuchos.historico.v1` en `localStorage`) que persiste entre lotes. Si un cartucho ya registrado en una tanda anterior se vuelve a escanear, se rechaza indicando la fecha y el lote en que entró. Así los duplicados se detectan en todo el inventario, no solo dentro de cada hoja.
+
+Quitar una fila con la × la borra también de la memoria, para poder volver a escanear ese cartucho. La memoria solo se vacía a propósito, con el enlace que hay bajo los botones.
 
 La hoja de la derecha va en el mismo orden que el archivo exportado: se añade una fila por escaneo, con scroll automático y la última marcada. Al rechazar un repetido, la hoja salta a la fila donde ya estaba ese serial. La × de cada fila la quita y renumera, y deja ese serial libre para volver a escanearlo.
 

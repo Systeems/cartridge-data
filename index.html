@@ -30,8 +30,6 @@
   .sheet{width:100%;max-width:1060px}
   h1{font-size:1.45rem;letter-spacing:-.02em;font-weight:700;margin:0 0 4px}
   .intro{margin:0 0 22px;color:var(--muted);font-size:.92rem;max-width:58ch}
-  .nav{color:var(--muted);text-underline-offset:3px;white-space:nowrap}
-  .nav:hover{color:var(--ink)}
 
   .layout{display:grid;gap:22px;align-items:start}
   @media (min-width:900px){ .layout{grid-template-columns:minmax(0,1fr) minmax(330px,400px)} }
@@ -41,9 +39,7 @@
     --state:var(--line);
     background:var(--card);
     border-left:9px solid var(--state);
-    border-radius:14px;
-    padding:20px 22px;
-    min-height:132px;
+    border-radius:14px;padding:20px 22px;min-height:132px;
     display:flex;flex-direction:column;justify-content:center;
     box-shadow:0 1px 0 rgba(0,0,0,.05),0 14px 32px -26px rgba(0,0,0,.5);
   }
@@ -57,14 +53,23 @@
   .flash{animation:pop .18s ease-out}
   @keyframes pop{from{transform:scale(.988)}to{transform:none}}
 
+  /* --- lote --- */
+  .lote{display:flex;align-items:center;gap:10px;margin-top:16px}
+  .lote label{font-size:.85rem;font-weight:600;flex:none}
+  .lote input{
+    flex:1;min-width:0;font:inherit;font-size:.95rem;padding:9px 12px;
+    border:1.5px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);
+  }
+  .lote input::placeholder{color:#AEB6BF}
+
   /* --- entrada --- */
-  .entry{margin-top:16px;display:flex;gap:9px}
-  input[type=text]{
+  .entry{margin-top:10px;display:flex;gap:9px}
+  #serial{
     flex:1;min-width:0;font-family:var(--mono);font-size:1.15rem;letter-spacing:.1em;
     padding:13px 14px;border:1.5px solid var(--line);border-radius:10px;
     background:var(--card);color:var(--ink);text-transform:uppercase;
   }
-  input[type=text]:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px;border-color:transparent}
+  input:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px;border-color:transparent}
   .btn{
     font:inherit;font-size:.9rem;font-weight:600;padding:0 17px;
     border:1.5px solid var(--ink);border-radius:10px;background:var(--ink);color:#fff;cursor:pointer;flex:none;
@@ -73,7 +78,7 @@
   .btn.quiet{background:var(--card);color:var(--ink);border-color:var(--line)}
   .btn.quiet:hover{background:var(--card);border-color:var(--ink)}
   .btn[hidden]{display:none}
-  .btn:focus-visible,.link:focus-visible,.goal input:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
+  .btn:focus-visible,.link:focus-visible,.inline:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
 
   /* --- contador --- */
   .count{display:flex;align-items:baseline;gap:10px;margin:22px 0 6px;flex-wrap:wrap}
@@ -92,7 +97,10 @@
 
   .tools{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
   .tools .btn{padding:10px 17px}
-  .note{margin:16px 0 0;color:var(--muted);font-size:.8rem;line-height:1.55;max-width:58ch}
+  .hist{margin:14px 0 0;color:var(--muted);font-size:.83rem}
+  .inline{background:none;border:0;padding:1px 4px;color:var(--muted);font:inherit;font-size:.83rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;border-radius:4px}
+  .inline:hover{color:var(--bad)}
+  .note{margin:14px 0 0;color:var(--muted);font-size:.8rem;line-height:1.55;max-width:58ch}
 
   .cam{margin-top:14px}
   .cam[hidden]{display:none}
@@ -102,10 +110,7 @@
   .hojaTop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 8px}
   h2{font-size:.88rem;font-weight:600;margin:0}
   .rows{color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
-  .grid{
-    border:1px solid var(--line);border-radius:10px;background:var(--card);
-    overflow:auto;max-height:62vh;
-  }
+  .grid{border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:auto;max-height:62vh}
   @media (max-width:899px){ .grid{max-height:44vh} }
   table{width:100%;border-collapse:separate;border-spacing:0;font-size:.85rem}
   thead th{
@@ -134,7 +139,7 @@
 <body>
 <main class="sheet">
   <h1>Escaneo de cartuchos</h1>
-  <p class="intro">Escanea el código de debajo de «Serial Number». Los P/N y los repetidos se rechazan solos.</p>
+  <p class="intro">Escanea el código de debajo de «Serial Number». Los P/N y los repetidos se rechazan solos, también si el repetido viene de un lote anterior.</p>
 
   <div class="layout">
     <section>
@@ -142,6 +147,11 @@
         <p class="verdict" id="verdict">Listo para escanear</p>
         <p class="sn" id="sn">—</p>
         <p class="detail" id="detail">El cursor está en el campo. Dispara el lector y empieza.</p>
+      </div>
+
+      <div class="lote">
+        <label for="lote">Lote</label>
+        <input id="lote" type="text" maxlength="40" autocomplete="off" placeholder="P/N o nombre del modelo, por ejemplo 10009110">
       </div>
 
       <div class="entry">
@@ -166,9 +176,11 @@
 
       <div class="tools">
         <button class="btn" id="export" type="button">Exportar a Excel</button>
+        <button class="btn quiet" id="close" type="button">Cerrar lote y vaciar hoja</button>
         <button class="btn quiet" id="sound" type="button">Sonido: activado</button>
-        <button class="btn quiet" id="wipe" type="button">Borrar todo</button>
       </div>
+
+      <p class="hist" id="hist"></p>
 
       <p class="note">
         Todo se guarda en este navegador después de cada escaneo, así que puedes cerrar y seguir mañana.
@@ -197,9 +209,11 @@
 <script>
 (function(){
   var CLAVE = 'cartuchos.v1';
+  var CLAVE_HIST = 'cartuchos.historico.v1';
   var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
   var input = document.getElementById('serial');
+  var loteEl = document.getElementById('lote');
   var band = document.getElementById('band');
   var verdict = document.getElementById('verdict');
   var snEl = document.getElementById('sn');
@@ -208,6 +222,7 @@
   var fill = document.getElementById('fill');
   var track = document.getElementById('track');
   var tally = document.getElementById('tally');
+  var histEl = document.getElementById('hist');
   var goalEl = document.getElementById('goal');
   var goalOff = document.getElementById('goalOff');
   var soundBtn = document.getElementById('sound');
@@ -216,9 +231,10 @@
   var vacio = document.getElementById('vacio');
   var rowsEl = document.getElementById('rows');
 
-  var filas = [];
-  var indice = {};
-  var rechazos = {pn:0, formato:0, dup:0};
+  var filas = [];        // hoja actual
+  var indice = {};       // sn -> ts, solo hoja actual
+  var historico = {};    // sn -> {ts, lote}, sobrevive al vaciado
+  var rechazos = {pn:0, formato:0, dup:0, hist:0};
   var sonido = true;
 
   /* ---------- almacenamiento ---------- */
@@ -226,7 +242,8 @@
   function guardarYa(){
     clearTimeout(pendiente); pendiente = null;
     try{
-      localStorage.setItem(CLAVE, JSON.stringify({filas:filas, rechazos:rechazos, objetivo:goalEl.value}));
+      localStorage.setItem(CLAVE, JSON.stringify({filas:filas, rechazos:rechazos, objetivo:goalEl.value, lote:loteEl.value}));
+      localStorage.setItem(CLAVE_HIST, JSON.stringify(historico));
     }catch(e){
       detail.textContent = 'Aviso: este navegador no está guardando. Exporta ahora.';
     }
@@ -237,11 +254,13 @@
       var d = JSON.parse(localStorage.getItem(CLAVE) || 'null');
       if(d && d.filas){
         filas = d.filas;
-        rechazos = d.rechazos || rechazos;
+        rechazos = Object.assign({pn:0, formato:0, dup:0, hist:0}, d.rechazos || {});
         if(d.objetivo !== undefined) goalEl.value = d.objetivo;
+        if(d.lote) loteEl.value = d.lote;
         filas.forEach(function(f){ indice[f.sn] = f.ts; });
       }
     }catch(e){}
+    try{ historico = JSON.parse(localStorage.getItem(CLAVE_HIST) || '{}') || {}; }catch(e){ historico = {}; }
   }
 
   /* ---------- fechas ---------- */
@@ -261,15 +280,11 @@
     return {
       sn:s, anio:anio, dia:dia,
       texto: f.getUTCDate() + ' de ' + MESES[f.getUTCMonth()] + ' de ' + f.getUTCFullYear(),
-      iso: f.getUTCFullYear() + '-' + String(f.getUTCMonth()+1).padStart(2,'0') + '-' + String(f.getUTCDate()).padStart(2,'0'),
-      esp: String(f.getUTCDate()).padStart(2,'0') + '/' + String(f.getUTCMonth()+1).padStart(2,'0') + '/' + f.getUTCFullYear()
+      iso: f.getUTCFullYear() + '-' + String(f.getUTCMonth()+1).padStart(2,'0') + '-' + String(f.getUTCDate()).padStart(2,'0')
     };
   }
 
-  function espDesdeIso(iso){
-    var p = iso.split('-');
-    return p[2] + '/' + p[1] + '/' + p[0];
-  }
+  function espDesdeIso(iso){ var p = iso.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
   function hora(ts){
     var d = new Date(ts);
     return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
@@ -323,7 +338,6 @@
                    '<td class="act"><button class="link" type="button" title="Quitar esta fila" aria-label="Quitar ' + f.sn + '">&times;</button></td>';
     return tr;
   }
-
   function reconstruirHoja(){
     tbody.innerHTML = '';
     var frag = document.createDocumentFragment();
@@ -333,7 +347,6 @@
     rowsEl.textContent = filas.length.toLocaleString('es-ES') + (filas.length === 1 ? ' fila' : ' filas');
     grid.scrollTop = grid.scrollHeight;
   }
-
   function anadirAHoja(f){
     var anterior = tbody.querySelector('tr.nuevo');
     if(anterior) anterior.classList.remove('nuevo');
@@ -345,7 +358,9 @@
     grid.scrollTop = grid.scrollHeight;
   }
 
-  /* ---------- contador ---------- */
+  /* ---------- contador e histórico ---------- */
+  function contarHistorico(){ return Object.keys(historico).length; }
+
   function pintarContador(){
     totalEl.textContent = filas.length.toLocaleString('es-ES');
     var obj = parseInt(String(goalEl.value).replace(/\D/g,''),10) || 0;
@@ -354,7 +369,8 @@
     fill.style.width = obj ? Math.min(100, filas.length / obj * 100) + '%' : '0';
 
     var r = [];
-    if(rechazos.dup) r.push(rechazos.dup + ' repetidos');
+    if(rechazos.dup) r.push(rechazos.dup + ' repetidos de esta hoja');
+    if(rechazos.hist) r.push(rechazos.hist + ' ya registrados en lotes anteriores');
     if(rechazos.pn) r.push(rechazos.pn + ' lecturas de P/N');
     if(rechazos.formato) r.push(rechazos.formato + ' lecturas con formato raro');
     var linea = r.length ? 'Rechazados: ' + r.join(', ') + '.' : 'Sin rechazos todavía.';
@@ -362,6 +378,12 @@
       linea = (filas.length >= obj ? 'Objetivo alcanzado. ' : 'Faltan ' + (obj - filas.length).toLocaleString('es-ES') + '. ') + linea;
     }
     tally.textContent = linea;
+
+    var n = contarHistorico();
+    histEl.innerHTML = n
+      ? 'Memoria: ' + n.toLocaleString('es-ES') + ' seriales registrados en total, contando los lotes ya cerrados. ' +
+        '<button class="inline" id="wipeHist" type="button">Borrar la memoria</button>'
+      : 'Memoria vacía: todavía no se ha cerrado ningún lote.';
   }
 
   /* ---------- registrar ---------- */
@@ -379,25 +401,34 @@
     }
     if(indice[r.sn]){
       rechazos.dup++;
-      estado('dup', 'Repetido', r.sn, 'Ya lo escaneaste el ' + fechaHora(indice[r.sn]) + '. No se ha añadido.');
+      estado('dup', 'Repetido en esta hoja', r.sn, 'Ya lo escaneaste el ' + fechaHora(indice[r.sn]) + '. No se ha añadido.');
       pitar('dup');
       var ya = tbody.querySelector('tr[data-sn="' + r.sn + '"]');
       if(ya) ya.scrollIntoView({block:'center'});
       guardar(); pintarContador();
       return;
     }
+    var viejo = historico[r.sn];
+    if(viejo){
+      rechazos.hist++;
+      estado('dup', 'Ya registrado antes', r.sn,
+        'Entró el ' + fechaHora(viejo.ts) + (viejo.lote ? ' en el lote ' + viejo.lote : '') + '. No se ha añadido.');
+      pitar('dup');
+      guardar(); pintarContador();
+      return;
+    }
     var ts = Date.now();
     filas.push({sn:r.sn, anio:r.anio, dia:r.dia, iso:r.iso, ts:ts});
     indice[r.sn] = ts;
+    historico[r.sn] = {ts:ts, lote:loteEl.value.trim()};
     anadirAHoja(filas[filas.length-1]);
-    estado('ok', 'Añadido, ' + filas.length.toLocaleString('es-ES') + ' en total', r.sn, 'Fabricado el ' + r.texto + '.');
+    estado('ok', 'Añadido, ' + filas.length.toLocaleString('es-ES') + ' en esta hoja', r.sn, 'Fabricado el ' + r.texto + '.');
     pitar('ok');
     guardar(); pintarContador();
   }
 
   /* ---------- entrada ---------- */
   var primerTecla = 0, temporizador = null;
-
   function enviar(){
     clearTimeout(temporizador);
     var v = input.value;
@@ -405,7 +436,6 @@
     primerTecla = 0;
     if(v.trim()) registrar(v);
   }
-
   input.addEventListener('keydown', function(e){
     if(e.key === 'Enter'){ e.preventDefault(); enviar(); return; }
     if(!primerTecla) primerTecla = Date.now();
@@ -425,6 +455,26 @@
   });
   input.focus();
 
+  /* ---------- devolver el foco al campo de escaneo ---------- */
+  function protegerFoco(el, limpiar){
+    var t = null;
+    el.addEventListener('input', function(){
+      if(limpiar){
+        var limpio = el.value.replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+        if(limpio !== el.value) el.value = limpio;
+      }
+      guardar(); pintarContador();
+      clearTimeout(t);
+      t = setTimeout(function(){ input.focus(); }, 6000);
+    });
+    el.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); clearTimeout(t); input.focus(); }
+    });
+    el.addEventListener('focus', function(){ el.select(); });
+  }
+  protegerFoco(goalEl, true);
+  protegerFoco(loteEl, false);
+
   /* ---------- quitar fila ---------- */
   tbody.addEventListener('click', function(e){
     var b = e.target.closest('.link');
@@ -432,23 +482,10 @@
     var sn = b.closest('tr').getAttribute('data-sn');
     filas = filas.filter(function(f){ return f.sn !== sn; });
     delete indice[sn];
+    delete historico[sn];
     estado('idle', 'Quitado', sn, 'Se puede volver a escanear.');
     guardarYa(); reconstruirHoja(); pintarContador(); input.focus();
   });
-
-  /* ---------- objetivo ---------- */
-  var vueltaFoco = null;
-  goalEl.addEventListener('input', function(){
-    var limpio = goalEl.value.replace(/\D/g,'').replace(/^0+(?=\d)/,'');
-    if(limpio !== goalEl.value) goalEl.value = limpio;
-    guardar(); pintarContador();
-    clearTimeout(vueltaFoco);
-    vueltaFoco = setTimeout(function(){ input.focus(); }, 6000);
-  });
-  goalEl.addEventListener('keydown', function(e){
-    if(e.key === 'Enter'){ e.preventDefault(); clearTimeout(vueltaFoco); input.focus(); }
-  });
-  goalEl.addEventListener('focus', function(){ goalEl.select(); });
 
   /* ---------- sonido ---------- */
   soundBtn.addEventListener('click', function(){
@@ -459,30 +496,51 @@
   });
 
   /* ---------- exportar ---------- */
-  document.getElementById('export').addEventListener('click', function(){
-    if(!filas.length){ estado('bad','Nada que exportar','—','Escanea al menos un cartucho.'); return; }
-    var lineas = ['Numero de serie;Fecha de fabricacion;Dia del año;Año;Escaneado el'];
+  function exportar(){
+    var lineas = ['Lote;Numero de serie;Fecha de fabricacion;Dia del año;Año;Escaneado el'];
+    var lote = loteEl.value.trim().replace(/;/g,',');
     filas.forEach(function(f){
-      lineas.push([f.sn, espDesdeIso(f.iso), f.dia, f.anio, fechaHora(f.ts)].join(';'));
+      lineas.push([lote, f.sn, espDesdeIso(f.iso), f.dia, f.anio, fechaHora(f.ts)].join(';'));
     });
     var blob = new Blob(['\ufeff' + lineas.join('\r\n')], {type:'text/csv;charset=utf-8;'});
     var a = document.createElement('a');
     var hoy = new Date();
+    var sello = hoy.getFullYear() + String(hoy.getMonth()+1).padStart(2,'0') + String(hoy.getDate()).padStart(2,'0');
+    var etiqueta = lote ? lote.replace(/[^\w\-]+/g,'-') + '-' : '';
     a.href = URL.createObjectURL(blob);
-    a.download = 'cartuchos-' + hoy.getFullYear() + String(hoy.getMonth()+1).padStart(2,'0') + String(hoy.getDate()).padStart(2,'0') + '.csv';
+    a.download = 'cartuchos-' + etiqueta + sello + '.csv';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
-    estado('ok', 'Exportado', filas.length.toLocaleString('es-ES') + ' cartuchos', 'Ábrelo con Excel. Los datos siguen aquí por si quieres continuar.');
+  }
+
+  document.getElementById('export').addEventListener('click', function(){
+    if(!filas.length){ estado('bad','Nada que exportar','—','Escanea al menos un cartucho.'); return; }
+    exportar();
+    estado('ok', 'Exportado', filas.length.toLocaleString('es-ES') + ' cartuchos', 'La hoja sigue aquí: exportar no borra nada.');
     input.focus();
   });
 
-  /* ---------- borrar ---------- */
-  document.getElementById('wipe').addEventListener('click', function(){
-    if(!filas.length) return;
-    if(!confirm('Vas a borrar ' + filas.length + ' cartuchos. ¿Los has exportado ya?')) return;
-    filas = []; indice = {}; rechazos = {pn:0, formato:0, dup:0};
+  /* ---------- cerrar lote ---------- */
+  document.getElementById('close').addEventListener('click', function(){
+    if(!filas.length){ estado('idle','La hoja ya está vacía','—','Pon el lote nuevo y empieza a escanear.'); input.focus(); return; }
+    if(!confirm('Vas a vaciar la hoja con ' + filas.length + ' cartuchos.\n\nLos seriales se quedan en la memoria, así que seguirán detectándose como repetidos.\n\n¿Los has exportado ya?')) return;
+    var n = filas.length;
+    filas = []; indice = {};
+    rechazos = {pn:0, formato:0, dup:0, hist:0};
     guardarYa(); reconstruirHoja(); pintarContador();
-    estado('idle', 'Listo para escanear', '—', 'La lista está vacía.');
+    estado('idle', 'Lote cerrado', n.toLocaleString('es-ES') + ' cartuchos guardados en memoria', 'Cambia el lote arriba y sigue escaneando.');
+    loteEl.focus();
+  });
+
+  /* ---------- borrar memoria ---------- */
+  histEl.addEventListener('click', function(e){
+    if(!e.target.closest('#wipeHist')) return;
+    var n = contarHistorico();
+    if(!confirm('Vas a borrar la memoria de ' + n + ' seriales.\n\nA partir de ahí, un cartucho de un lote ya cerrado volvería a entrar como nuevo. Esto no se puede deshacer.\n\n¿Seguro?')) return;
+    historico = {};
+    filas.forEach(function(f){ historico[f.sn] = {ts:f.ts, lote:loteEl.value.trim()}; });
+    guardarYa(); pintarContador();
+    estado('idle', 'Memoria borrada', '—', 'Solo quedan los seriales de la hoja actual.');
     input.focus();
   });
 
