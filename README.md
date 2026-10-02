@@ -1,8 +1,11 @@
 # Cartuchos Memjet
 
-Estación de escaneo en serie para los cartuchos de tinta Memjet. Registra cientos o miles de unidades, rechaza duplicados y P/N, muestra la hoja en vivo mientras escaneas y exporta a Excel.
+Dos páginas estáticas para los cartuchos de tinta Memjet, con un botón para saltar de una a otra.
 
-Una sola página estática: sin dependencias, sin CDN y sin backend. Todo va embebido en `index.html`.
+- **`index.html`** — estación de escaneo en serie. Registra cientos o miles de unidades, rechaza duplicados y P/N, muestra la hoja en vivo y exporta a Excel.
+- **`fecha.html`** — consulta suelta. Un serial, su fecha de fabricación y el desglose de qué significa cada tramo. No registra nada.
+
+Sin dependencias, sin CDN y sin backend. Todo va embebido en cada archivo.
 
 ## La regla del número de serie
 

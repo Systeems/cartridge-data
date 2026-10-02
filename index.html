@@ -28,7 +28,15 @@
     padding:26px 16px 60px;-webkit-font-smoothing:antialiased;
   }
   .sheet{width:100%;max-width:1060px}
-  h1{font-size:1.45rem;letter-spacing:-.02em;font-weight:700;margin:0 0 4px}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:4px}
+  h1{font-size:1.45rem;letter-spacing:-.02em;font-weight:700;margin:0}
+  .goto{
+    flex:none;font:inherit;font-size:.82rem;font-weight:600;
+    padding:8px 13px;border:1.5px solid var(--line);border-radius:9px;
+    background:var(--card);color:var(--ink);text-decoration:none;white-space:nowrap;
+  }
+  .goto:hover{border-color:var(--ink)}
+  .goto:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
   .intro{margin:0 0 22px;color:var(--muted);font-size:.92rem;max-width:58ch}
 
   .layout{display:grid;gap:22px;align-items:start}
@@ -138,7 +146,10 @@
 </head>
 <body>
 <main class="sheet">
-  <h1>Escaneo de cartuchos</h1>
+  <div class="top">
+    <h1>Escaneo de cartuchos</h1>
+    <a class="goto" href="fecha.html">Consultar una fecha</a>
+  </div>
   <p class="intro">Escanea el código de debajo de «Serial Number». Los P/N y los repetidos se rechazan solos, también si el repetido viene de un lote anterior.</p>
 
   <div class="layout">
