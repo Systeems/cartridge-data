@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fecha del cartucho</title>
+<title>Escaneo de cartuchos</title>
 <style>
   :root{
     --paper:#E7EAED;
@@ -13,332 +13,472 @@
     --line:#D6DBE0;
     --cyan:#00A3C8;
     --magenta:#CE0069;
-    --unknown:#A3ACB8;
+    --ok:#0B7A4B;
+    --dup:#A86300;
     --bad:#B3261E;
-    --sans: "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Roboto Mono", monospace;
+    --sans:"Helvetica Neue",Helvetica,Arial,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Roboto Mono",monospace;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
   body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:var(--sans);
-    line-height:1.5;
-    display:flex;
-    justify-content:center;
-    padding:32px 18px 64px;
-    -webkit-font-smoothing:antialiased;
+    background:var(--paper);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;display:flex;justify-content:center;
+    padding:26px 16px 60px;-webkit-font-smoothing:antialiased;
   }
-  .sheet{
-    width:100%;
-    max-width:540px;
+  .sheet{width:100%;max-width:620px}
+  h1{font-size:1.45rem;letter-spacing:-.02em;font-weight:700;margin:0 0 4px}
+  .intro{margin:0 0 20px;color:var(--muted);font-size:.92rem;max-width:52ch}
+  .nav{color:var(--muted);text-underline-offset:3px;white-space:nowrap}
+  .nav:hover{color:var(--ink)}
+
+  /* --- banda de estado --- */
+  .band{
+    --state:var(--line);
     background:var(--card);
-    border-radius:22px;
-    padding:34px 30px 30px;
-    box-shadow:0 1px 0 rgba(0,0,0,.06), 0 18px 40px -28px rgba(0,0,0,.45);
+    border-left:9px solid var(--state);
+    border-radius:14px;
+    padding:20px 22px;
+    min-height:132px;
+    display:flex;flex-direction:column;justify-content:center;
+    box-shadow:0 1px 0 rgba(0,0,0,.05),0 14px 32px -26px rgba(0,0,0,.5);
   }
-  h1{
-    font-size:clamp(1.5rem,4.5vw,1.9rem);
-    letter-spacing:-.02em;
-    font-weight:700;
-    margin:0 0 6px;
-  }
-  .intro{margin:0 0 26px;color:var(--muted);font-size:.95rem;max-width:44ch}
-  label{display:block;font-size:.85rem;font-weight:600;margin-bottom:7px}
-  input{
-    width:100%;
-    font-family:var(--mono);
-    font-size:1.32rem;
-    letter-spacing:.13em;
-    padding:14px 15px;
-    border:1.5px solid var(--line);
-    border-radius:10px;
-    background:#FBFCFD;
-    color:var(--ink);
-    text-transform:uppercase;
-  }
-  input:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px;border-color:transparent}
-  input::placeholder{color:#B6BDC6;letter-spacing:.13em}
+  .band[data-state="ok"]{--state:var(--ok);background:#F1FAF5}
+  .band[data-state="dup"]{--state:var(--dup);background:#FEF8EC}
+  .band[data-state="bad"]{--state:var(--bad);background:#FDF3F2}
+  .verdict{font-size:1.15rem;font-weight:700;margin:0 0 6px;color:var(--state)}
+  .band[data-state="idle"] .verdict{color:var(--muted);font-weight:600}
+  .sn{font-family:var(--mono);font-size:clamp(1.3rem,5vw,1.75rem);letter-spacing:.07em;margin:0 0 4px;word-break:break-all}
+  .detail{margin:0;color:var(--muted);font-size:.93rem}
+  .flash{animation:pop .18s ease-out}
+  @keyframes pop{from{transform:scale(.988)}to{transform:none}}
+  @media (prefers-reduced-motion:reduce){.flash{animation:none}}
 
-  .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
-  .scan{
-    font:inherit;
-    font-size:.9rem;
-    font-weight:600;
-    padding:9px 15px;
-    border:1.5px solid var(--ink);
-    border-radius:9px;
-    background:var(--ink);
-    color:#fff;
-    cursor:pointer;
+  /* --- entrada --- */
+  .entry{margin-top:16px;display:flex;gap:9px}
+  input[type=text]{
+    flex:1;min-width:0;font-family:var(--mono);font-size:1.15rem;letter-spacing:.1em;
+    padding:13px 14px;border:1.5px solid var(--line);border-radius:10px;
+    background:var(--card);color:var(--ink);text-transform:uppercase;
   }
-  .scan:hover{background:#000}
-  .scan[hidden]{display:none}
-  .example{
-    background:none;border:0;padding:4px 6px;color:var(--muted);
-    font:inherit;font-size:.85rem;cursor:pointer;
-    text-decoration:underline;text-underline-offset:3px;
+  input[type=text]:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px;border-color:transparent}
+  .btn{
+    font:inherit;font-size:.9rem;font-weight:600;padding:0 17px;
+    border:1.5px solid var(--ink);border-radius:10px;background:var(--ink);color:#fff;cursor:pointer;flex:none;
   }
-  .example:hover{color:var(--ink)}
-  .scan:focus-visible,.example:focus-visible,.cancel:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
+  .btn.quiet{background:var(--card);color:var(--ink);border-color:var(--line)}
+  .btn.quiet:hover{border-color:var(--ink)}
+  .btn:hover{background:#000}
+  .btn.quiet:hover{background:var(--card)}
+  .btn[hidden]{display:none}
+  .btn:focus-visible,.link:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
 
-  .camera{margin-top:16px}
-  .camera[hidden]{display:none}
-  video{
-    width:100%;
-    max-height:230px;
-    object-fit:cover;
-    border-radius:12px;
-    background:#111;
-    display:block;
+  /* --- contador --- */
+  .count{display:flex;align-items:baseline;gap:10px;margin:22px 0 6px;flex-wrap:wrap}
+  .total{font-size:2.4rem;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+  .goal{color:var(--muted);font-size:.95rem}
+  .goal input{
+    width:62px;font:inherit;font-variant-numeric:tabular-nums;padding:2px 5px;
+    border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);
   }
-  .camrow{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:9px}
-  .camnote{color:var(--muted);font-size:.85rem;margin:0}
-  .cancel{
-    font:inherit;font-size:.85rem;font-weight:600;
-    padding:7px 13px;border:1.5px solid var(--line);border-radius:8px;
-    background:#fff;color:var(--ink);cursor:pointer;flex:none;
-  }
+  .track{height:5px;background:var(--line);border-radius:3px;overflow:hidden}
+  .fill{height:100%;background:var(--ink);width:0;transition:width .3s ease}
+  @media (prefers-reduced-motion:reduce){.fill{transition:none}}
+  .tally{margin:9px 0 0;color:var(--muted);font-size:.85rem}
 
-  .out{margin-top:26px;padding-top:24px;border-top:1px solid var(--line)}
-  .hint{color:var(--muted);font-size:.92rem;margin:0}
-  .error{color:var(--bad);font-size:.92rem;margin:0;font-weight:600}
+  /* --- lista --- */
+  h2{font-size:.85rem;font-weight:600;margin:28px 0 9px}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th{text-align:left;font-weight:600;color:var(--muted);font-size:.78rem;padding:0 0 7px;border-bottom:1px solid var(--line)}
+  th.r,td.r{text-align:right}
+  td{padding:9px 0;border-bottom:1px solid var(--line);vertical-align:baseline}
+  td.code{font-family:var(--mono);letter-spacing:.05em}
+  td.when{color:var(--muted);font-variant-numeric:tabular-nums}
+  .link{background:none;border:0;padding:2px 4px;color:var(--muted);font:inherit;font-size:.82rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .link:hover{color:var(--bad)}
+  .empty{color:var(--muted);font-size:.9rem;margin:14px 0 0}
+  .more{color:var(--muted);font-size:.82rem;margin:10px 0 0}
 
-  .map{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 22px}
-  .group{min-width:0}
-  .chars{display:flex;gap:3px}
-  .ch{
-    font-family:var(--mono);
-    font-size:1.18rem;
-    line-height:1.1;
-    padding:7px 4px 8px;
-    min-width:22px;
-    text-align:center;
-    border-bottom:3px solid currentColor;
-  }
-  .group .ch{color:var(--unknown)}
-  .group.year .ch{color:var(--cyan)}
-  .group.day .ch{color:var(--magenta)}
-  .tag{display:block;margin-top:7px;font-size:.74rem;color:var(--muted);max-width:15ch}
+  .tools{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+  .tools .btn{padding:10px 17px}
+  .note{margin:16px 0 0;color:var(--muted);font-size:.8rem;line-height:1.55;max-width:58ch}
 
-  .date{
-    font-size:clamp(1.65rem,6vw,2.25rem);
-    font-weight:700;
-    letter-spacing:-.025em;
-    margin:0 0 3px;
-  }
-  .weekday{margin:0 0 22px;color:var(--muted);font-size:.98rem}
-  dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:9px 20px;font-size:.92rem}
-  dt{color:var(--muted)}
-  dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
-  .reveal{animation:in .22s ease-out}
-  @keyframes in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-  @media (prefers-reduced-motion:reduce){.reveal{animation:none}}
-  footer{margin-top:26px;color:var(--muted);font-size:.8rem;line-height:1.55}
+  .cam{margin-top:14px}
+  .cam[hidden]{display:none}
+  video{width:100%;max-height:240px;object-fit:cover;border-radius:12px;background:#111;display:block}
 </style>
 </head>
 <body>
 <main class="sheet">
-  <h1>Fecha del cartucho</h1>
-  <p class="intro">Escanea el código de barras del número de serie o escríbelo a mano. Con los seis primeros caracteres ya hay suficiente.</p>
+  <h1>Escaneo de cartuchos</h1>
+  <p class="intro">Escanea el código de debajo de «Serial Number». Los P/N y los repetidos se rechazan solos.
+    <a class="nav" href="fecha.html">Consultar un cartucho suelto</a></p>
 
-  <label for="serial">Número de serie</label>
-  <input id="serial" type="text" inputmode="latin" autocomplete="off" spellcheck="false"
-         placeholder="A2509714161002" aria-describedby="out">
-
-  <div class="actions">
-    <button class="scan" id="scan" type="button" hidden>Escanear con la cámara</button>
-    <button class="example" id="example" type="button">Probar con A2509714161002</button>
+  <div class="band" id="band" data-state="idle">
+    <p class="verdict" id="verdict">Listo para escanear</p>
+    <p class="sn" id="sn">—</p>
+    <p class="detail" id="detail">El cursor está en el campo. Dispara el lector y empieza.</p>
   </div>
 
-  <div class="camera" id="camera" hidden>
+  <div class="entry">
+    <input id="serial" type="text" autocomplete="off" spellcheck="false" placeholder="A2509714161002"
+           aria-label="Número de serie">
+    <button class="btn" id="add" type="button">Añadir</button>
+    <button class="btn quiet" id="camBtn" type="button" hidden>Cámara</button>
+  </div>
+
+  <div class="cam" id="cam" hidden>
     <video id="video" playsinline muted></video>
-    <div class="camrow">
-      <p class="camnote" id="camnote">Enfoca el código de barras de debajo de «Serial Number».</p>
-      <button class="cancel" id="cancel" type="button">Cancelar</button>
+    <div class="tools">
+      <button class="btn quiet" id="camStop" type="button">Cerrar cámara</button>
     </div>
   </div>
 
-  <div class="out" id="out" aria-live="polite">
-    <p class="hint">Aquí aparecerá la fecha de fabricación.</p>
+  <div class="count">
+    <span class="total" id="total">0</span>
+    <span class="goal">de <input id="goal" type="text" inputmode="numeric" value="3000" aria-label="Objetivo"> cartuchos</span>
+  </div>
+  <div class="track"><div class="fill" id="fill"></div></div>
+  <p class="tally" id="tally">Sin rechazos todavía.</p>
+
+  <h2>Últimos escaneos</h2>
+  <div id="listWrap">
+    <p class="empty">Todavía no hay ninguno.</p>
   </div>
 
-  <footer>
-    Año: dos dígitos tras el prefijo. Día: los tres siguientes, contados desde el 1 de enero.
-    La letra inicial y los dígitos finales no están identificados y no afectan a la fecha.
-  </footer>
+  <div class="tools">
+    <button class="btn" id="export" type="button">Exportar a Excel</button>
+    <button class="btn quiet" id="sound" type="button">Sonido: activado</button>
+    <button class="btn quiet" id="wipe" type="button">Borrar todo</button>
+  </div>
+
+  <p class="note">
+    Todo se guarda en este navegador después de cada escaneo, así que puedes cerrar y seguir mañana.
+    Aun así exporta cada rato: si alguien borra los datos de navegación, se pierde.
+  </p>
 </main>
 
 <script>
 (function(){
-  var input = document.getElementById('serial');
-  var out = document.getElementById('out');
-  var scanBtn = document.getElementById('scan');
-  var camera = document.getElementById('camera');
-  var camnote = document.getElementById('camnote');
-  var video = document.getElementById('video');
+  var CLAVE = 'cartuchos.v1';
   var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  var DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 
+  var input = document.getElementById('serial');
+  var band = document.getElementById('band');
+  var verdict = document.getElementById('verdict');
+  var snEl = document.getElementById('sn');
+  var detail = document.getElementById('detail');
+  var totalEl = document.getElementById('total');
+  var fill = document.getElementById('fill');
+  var tally = document.getElementById('tally');
+  var listWrap = document.getElementById('listWrap');
+  var goalEl = document.getElementById('goal');
+  var soundBtn = document.getElementById('sound');
+
+  var filas = [];          // {sn, anio, dia, iso, ts}
+  var indice = {};         // sn -> ts del primero
+  var rechazos = {pn:0, formato:0, dup:0};
+  var sonido = true;
+
+  /* ---------- almacenamiento ---------- */
+  var pendiente = null;
+  function guardarYa(){
+    clearTimeout(pendiente); pendiente = null;
+    try{
+      localStorage.setItem(CLAVE, JSON.stringify({filas:filas, rechazos:rechazos, objetivo:goalEl.value}));
+    }catch(e){
+      detail.textContent = 'Aviso: este navegador no está guardando. Exporta ahora.';
+    }
+  }
+  // con miles de filas serializar en cada disparo frenaría el lector: se agrupa
+  function guardar(){
+    if(pendiente) return;
+    pendiente = setTimeout(guardarYa, 400);
+  }
+  function cargar(){
+    try{
+      var d = JSON.parse(localStorage.getItem(CLAVE) || 'null');
+      if(d && d.filas){
+        filas = d.filas;
+        rechazos = d.rechazos || rechazos;
+        if(d.objetivo) goalEl.value = d.objetivo;
+        filas.forEach(function(f){ indice[f.sn] = f.ts; });
+      }
+    }catch(e){}
+  }
+
+  /* ---------- fechas ---------- */
   function bisiesto(y){ return (y%4===0 && y%100!==0) || y%400===0; }
 
-  function parse(raw){
-    var s = raw.toUpperCase().replace(/[^A-Z0-9]/g,'');
-    if(!s) return {estado:'vacio'};
-    if(s.length < 6) return {estado:'error', msg:'Faltan caracteres: hacen falta al menos 6 (letra + año + día).'};
-    var prefijo = s.charAt(0);
-    var yy = s.substring(1,3);
-    var ddd = s.substring(3,6);
-    var resto = s.substring(6);
-    if(!/^[A-Z]$/.test(prefijo)) return {estado:'error', msg:'El primer carácter debe ser una letra.'};
-    if(!/^\d{2}$/.test(yy) || !/^\d{3}$/.test(ddd)) return {estado:'error', msg:'Las posiciones 2 a 6 deben ser dígitos: dos de año y tres de día.'};
-    var anio = 2000 + parseInt(yy,10);
-    var dia = parseInt(ddd,10);
+  function decodificar(bruto){
+    var s = String(bruto).toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if(!s) return {ko:'vacio', msg:'No ha llegado nada.'};
+    if(/^\d+$/.test(s)) return {ko:'pn', msg:'Eso es el P/N. Apunta al código de debajo de «Serial Number».'};
+    if(s.length < 6) return {ko:'formato', msg:'Lectura incompleta: solo han llegado ' + s.length + ' caracteres.'};
+    if(!/^[A-Z]\d{5}/.test(s)) return {ko:'formato', msg:'No tiene forma de número de serie: debe empezar por una letra y cinco dígitos.'};
+    var anio = 2000 + parseInt(s.substring(1,3),10);
+    var dia = parseInt(s.substring(3,6),10);
     var tope = bisiesto(anio) ? 366 : 365;
-    if(dia < 1 || dia > tope){
-      return {estado:'error', msg:'El día ' + ddd + ' no existe en ' + anio + ': el máximo es ' + tope + '.'};
-    }
-    return {estado:'ok', prefijo:prefijo, yy:yy, ddd:ddd, resto:resto, anio:anio, dia:dia,
-            fecha:new Date(Date.UTC(anio,0,dia))};
+    if(dia < 1 || dia > tope) return {ko:'formato', msg:'El día ' + s.substring(3,6) + ' no existe en ' + anio + '.'};
+    var f = new Date(Date.UTC(anio,0,dia));
+    return {
+      sn:s, anio:anio, dia:dia, fecha:f,
+      texto: f.getUTCDate() + ' de ' + MESES[f.getUTCMonth()] + ' de ' + f.getUTCFullYear(),
+      iso: f.getUTCFullYear() + '-' + String(f.getUTCMonth()+1).padStart(2,'0') + '-' + String(f.getUTCDate()).padStart(2,'0')
+    };
   }
 
-  function antiguedad(f){
-    var hoy = new Date();
-    var hoyUTC = new Date(Date.UTC(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()));
-    if(f.getTime() > hoyUTC.getTime()) return 'fecha futura';
-    var meses = (hoyUTC.getUTCFullYear() - f.getUTCFullYear()) * 12
-              + (hoyUTC.getUTCMonth() - f.getUTCMonth());
-    if(hoyUTC.getUTCDate() < f.getUTCDate()) meses--;
-    if(meses < 1){
-      var dias = Math.round((hoyUTC.getTime() - f.getTime()) / 86400000);
-      return dias + (dias === 1 ? ' día' : ' días');
-    }
-    var a = Math.floor(meses/12), m = meses%12;
-    var partes = [];
-    if(a) partes.push(a + (a === 1 ? ' año' : ' años'));
-    if(m) partes.push(m + (m === 1 ? ' mes' : ' meses'));
-    return partes.join(' y ');
+  function hora(ts){
+    var d = new Date(ts);
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+  function fechaHora(ts){
+    var d = new Date(ts);
+    return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' +
+           d.getFullYear() + ' ' + hora(ts);
   }
 
-  function chars(txt){
-    return txt.split('').map(function(c){ return '<span class="ch">' + c + '</span>'; }).join('');
+  /* ---------- sonido ---------- */
+  var ac = null;
+  function pitar(tipo){
+    if(!sonido) return;
+    try{
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      if(ac.state === 'suspended') ac.resume();
+      var notas = tipo === 'ok' ? [[980,.07]] : tipo === 'dup' ? [[620,.1],[620,.1]] : [[190,.26]];
+      var t = ac.currentTime;
+      notas.forEach(function(n){
+        var o = ac.createOscillator(), g = ac.createGain();
+        o.type = tipo === 'bad' ? 'square' : 'sine';
+        o.frequency.value = n[0];
+        g.gain.setValueAtTime(.0001, t);
+        g.gain.exponentialRampToValueAtTime(.18, t + .01);
+        g.gain.exponentialRampToValueAtTime(.0001, t + n[1]);
+        o.connect(g); g.connect(ac.destination);
+        o.start(t); o.stop(t + n[1] + .02);
+        t += n[1] + .05;
+      });
+    }catch(e){}
   }
 
-  function grupo(clase, txt, etiqueta){
-    return '<div class="group ' + clase + '"><div class="chars">' + chars(txt) + '</div>' +
-           '<span class="tag">' + etiqueta + '</span></div>';
+  /* ---------- pintar ---------- */
+  function estado(tipo, titulo, codigo, texto){
+    band.setAttribute('data-state', tipo);
+    verdict.textContent = titulo;
+    snEl.textContent = codigo;
+    detail.textContent = texto;
+    band.classList.remove('flash');
+    void band.offsetWidth;
+    band.classList.add('flash');
   }
 
-  function render(){
-    var r = parse(input.value);
-    if(r.estado === 'vacio'){
-      out.innerHTML = '<p class="hint">Aquí aparecerá la fecha de fabricación.</p>';
+  function pintarTodo(){
+    totalEl.textContent = filas.length.toLocaleString('es-ES');
+    var obj = parseInt(String(goalEl.value).replace(/\D/g,''),10) || 0;
+    fill.style.width = obj ? Math.min(100, filas.length / obj * 100) + '%' : '0';
+
+    var r = [];
+    if(rechazos.dup) r.push(rechazos.dup + ' repetidos');
+    if(rechazos.pn) r.push(rechazos.pn + ' lecturas de P/N');
+    if(rechazos.formato) r.push(rechazos.formato + ' lecturas con formato raro');
+    tally.textContent = r.length ? 'Rechazados: ' + r.join(', ') + '.' : 'Sin rechazos todavía.';
+
+    if(!filas.length){
+      listWrap.innerHTML = '<p class="empty">Todavía no hay ninguno.</p>';
       return;
     }
-    if(r.estado === 'error'){
-      out.innerHTML = '<p class="error">' + r.msg + '</p>';
-      return;
-    }
-    var f = r.fecha;
-    var texto = f.getUTCDate() + ' de ' + MESES[f.getUTCMonth()] + ' de ' + f.getUTCFullYear();
-    var iso = f.getUTCFullYear() + '-' +
-              String(f.getUTCMonth()+1).padStart(2,'0') + '-' +
-              String(f.getUTCDate()).padStart(2,'0');
-
-    var mapa = grupo('', r.prefijo, 'Prefijo, sin identificar') +
-               grupo('year', r.yy, 'Año ' + r.anio) +
-               grupo('day', r.ddd, 'Día ' + r.dia + ' del año') +
-               (r.resto ? grupo('', r.resto, 'Sin identificar') : '');
-
-    out.innerHTML =
-      '<div class="reveal">' +
-        '<div class="map">' + mapa + '</div>' +
-        '<p class="date">' + texto + '</p>' +
-        '<p class="weekday">' + DIAS[f.getUTCDay()] + '</p>' +
-        '<dl>' +
-          '<dt>Fecha ISO</dt><dd>' + iso + '</dd>' +
-          '<dt>Día del año</dt><dd>' + r.dia + ' de ' + (bisiesto(r.anio) ? 366 : 365) + '</dd>' +
-          '<dt>Antigüedad</dt><dd>' + antiguedad(f) + '</dd>' +
-        '</dl>' +
-      '</div>';
+    var ultimos = filas.slice(-12).reverse();
+    var html = '<table><thead><tr><th>Número de serie</th><th>Fabricación</th><th class="r">Escaneado</th><th></th></tr></thead><tbody>';
+    ultimos.forEach(function(f){
+      html += '<tr><td class="code">' + f.sn + '</td>' +
+              '<td>' + f.iso + '</td>' +
+              '<td class="when r">' + hora(f.ts) + '</td>' +
+              '<td class="r"><button class="link" data-sn="' + f.sn + '">Quitar</button></td></tr>';
+    });
+    html += '</tbody></table>';
+    if(filas.length > 12) html += '<p class="more">Y ' + (filas.length-12).toLocaleString('es-ES') + ' más, todos incluidos en la exportación.</p>';
+    listWrap.innerHTML = html;
   }
 
-  /* --- entrada manual y lector USB --- */
-  input.addEventListener('input', render);
-  input.addEventListener('focus', function(){ input.select(); });
+  /* ---------- registrar ---------- */
+  function registrar(bruto){
+    var r = decodificar(bruto);
+    if(r.ko){
+      if(r.ko === 'pn') rechazos.pn++;
+      else if(r.ko === 'formato') rechazos.formato++;
+      if(r.ko !== 'vacio'){
+        estado('bad', 'Rechazado', String(bruto).toUpperCase().slice(0,24) || '—', r.msg);
+        pitar('bad');
+      }
+      guardar(); pintarTodo();
+      return;
+    }
+    if(indice[r.sn]){
+      rechazos.dup++;
+      estado('dup', 'Repetido', r.sn, 'Ya lo escaneaste el ' + fechaHora(indice[r.sn]) + '. No se ha añadido.');
+      pitar('dup');
+      guardar(); pintarTodo();
+      return;
+    }
+    var ts = Date.now();
+    filas.push({sn:r.sn, anio:r.anio, dia:r.dia, iso:r.iso, ts:ts});
+    indice[r.sn] = ts;
+    estado('ok', 'Añadido, ' + filas.length.toLocaleString('es-ES') + ' en total', r.sn, 'Fabricado el ' + r.texto + '.');
+    pitar('ok');
+    guardar(); pintarTodo();
+  }
+
+  /* ---------- entrada por teclado y lector ---------- */
+  var primerTecla = 0, temporizador = null;
+
+  function enviar(){
+    clearTimeout(temporizador);
+    var v = input.value;
+    input.value = '';
+    primerTecla = 0;
+    if(v.trim()) registrar(v);
+  }
+
   input.addEventListener('keydown', function(e){
-    if(e.key === 'Enter'){ e.preventDefault(); render(); }
+    if(e.key === 'Enter'){ e.preventDefault(); enviar(); return; }
+    if(!primerTecla) primerTecla = Date.now();
   });
-  document.getElementById('example').addEventListener('click', function(){
-    input.value = 'A2509714161002';
-    render();
+
+  input.addEventListener('input', function(){
+    clearTimeout(temporizador);
+    var txt = input.value.replace(/\s/g,'');
+    if(txt.length < 6 || !primerTecla) return;
+    var porCaracter = (Date.now() - primerTecla) / txt.length;
+    // ráfaga rápida = lector sin Enter configurado; tecleo humano espera a Enter
+    if(porCaracter < 35) temporizador = setTimeout(enviar, 140);
+  });
+
+  document.getElementById('add').addEventListener('click', enviar);
+
+  // el lector escribe donde esté el foco: lo devolvemos al campo
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if(t.tagName === 'BUTTON' || t.tagName === 'INPUT' || t.tagName === 'VIDEO') return;
     input.focus();
   });
-  /* en escritorio el foco va al campo para que el lector USB escriba directo;
-     en táctil no, para no abrir el teclado nada más entrar */
-  if(!window.matchMedia('(pointer:coarse)').matches) input.focus();
+  input.focus();
 
-  /* --- cámara --- */
-  var detector = null, stream = null, corriendo = false;
+  /* ---------- quitar una fila ---------- */
+  listWrap.addEventListener('click', function(e){
+    var b = e.target.closest('.link');
+    if(!b) return;
+    var sn = b.getAttribute('data-sn');
+    filas = filas.filter(function(f){ return f.sn !== sn; });
+    delete indice[sn];
+    estado('idle', 'Quitado', sn, 'Se puede volver a escanear.');
+    guardar(); pintarTodo(); input.focus();
+  });
 
-  if(window.BarcodeDetector && navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-    scanBtn.hidden = false;
-  }
+  /* ---------- objetivo ---------- */
+  goalEl.addEventListener('input', function(){ guardar(); pintarTodo(); });
 
-  function parar(){
+  /* ---------- sonido ---------- */
+  soundBtn.addEventListener('click', function(){
+    sonido = !sonido;
+    soundBtn.textContent = 'Sonido: ' + (sonido ? 'activado' : 'apagado');
+    if(sonido) pitar('ok');
+    input.focus();
+  });
+
+  /* ---------- exportar ---------- */
+  document.getElementById('export').addEventListener('click', function(){
+    if(!filas.length){ estado('bad','Nada que exportar','—','Escanea al menos un cartucho.'); return; }
+    var lineas = ['Numero de serie;Fecha de fabricacion;Dia del año;Año;Escaneado el'];
+    filas.forEach(function(f){
+      var d = new Date(f.iso + 'T00:00:00Z');
+      var esp = String(d.getUTCDate()).padStart(2,'0') + '/' + String(d.getUTCMonth()+1).padStart(2,'0') + '/' + d.getUTCFullYear();
+      lineas.push([f.sn, esp, f.dia, f.anio, fechaHora(f.ts)].join(';'));
+    });
+    var blob = new Blob(['\ufeff' + lineas.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+    var a = document.createElement('a');
+    var hoy = new Date();
+    a.href = URL.createObjectURL(blob);
+    a.download = 'cartuchos-' + hoy.getFullYear() +
+                 String(hoy.getMonth()+1).padStart(2,'0') +
+                 String(hoy.getDate()).padStart(2,'0') + '.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    estado('ok', 'Exportado', filas.length.toLocaleString('es-ES') + ' cartuchos', 'Ábrelo con Excel. Los datos siguen aquí por si quieres continuar.');
+    input.focus();
+  });
+
+  /* ---------- borrar ---------- */
+  document.getElementById('wipe').addEventListener('click', function(){
+    if(!filas.length) return;
+    if(!confirm('Vas a borrar ' + filas.length + ' cartuchos. ¿Los has exportado ya?')) return;
+    filas = []; indice = {}; rechazos = {pn:0, formato:0, dup:0};
+    guardar(); pintarTodo();
+    estado('idle', 'Listo para escanear', '—', 'La lista está vacía.');
+    input.focus();
+  });
+
+  /* ---------- cámara ---------- */
+  var camBtn = document.getElementById('camBtn');
+  var cam = document.getElementById('cam');
+  var video = document.getElementById('video');
+  var detector = null, stream = null, corriendo = false, ultimo = '', ultimoTs = 0;
+
+  if(window.BarcodeDetector && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) camBtn.hidden = false;
+
+  function pararCam(){
     corriendo = false;
     if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
     video.srcObject = null;
-    camera.hidden = true;
+    cam.hidden = true;
   }
 
   function bucle(){
     if(!corriendo) return;
-    detector.detect(video).then(function(codigos){
+    detector.detect(video).then(function(c){
       if(!corriendo) return;
-      if(codigos.length){
-        var valor = codigos[0].rawValue || '';
-        if(valor.replace(/[^A-Z0-9]/gi,'').length >= 6){
-          input.value = valor;
-          parar();
-          render();
-          if(navigator.vibrate) navigator.vibrate(40);
-          return;
+      if(c.length){
+        var v = (c[0].rawValue || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
+        var ahora = Date.now();
+        if(v && (v !== ultimo || ahora - ultimoTs > 2500)){
+          ultimo = v; ultimoTs = ahora;
+          registrar(v);
+          if(navigator.vibrate) navigator.vibrate(35);
         }
       }
       requestAnimationFrame(bucle);
-    }).catch(function(){
-      if(corriendo) requestAnimationFrame(bucle);
-    });
+    }).catch(function(){ if(corriendo) requestAnimationFrame(bucle); });
   }
 
-  scanBtn.addEventListener('click', function(){
-    camera.hidden = false;
-    camnote.textContent = 'Abriendo la cámara…';
-    try{
-      detector = new BarcodeDetector({formats:['code_128','code_39','codabar','itf','ean_13','qr_code']});
-    }catch(err){
-      detector = new BarcodeDetector();
-    }
+  camBtn.addEventListener('click', function(){
+    cam.hidden = false;
+    try{ detector = new BarcodeDetector({formats:['code_128','code_39','itf','codabar']}); }
+    catch(err){ detector = new BarcodeDetector(); }
     navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}}).then(function(s){
-      stream = s;
-      video.srcObject = s;
-      return video.play();
+      stream = s; video.srcObject = s; return video.play();
     }).then(function(){
-      camnote.textContent = 'Enfoca el código de barras de debajo de «Serial Number».';
-      corriendo = true;
-      bucle();
+      corriendo = true; bucle();
+      estado('idle','Cámara abierta','—','Enfoca el código de debajo de «Serial Number». Sigue escaneando sin cerrar.');
     }).catch(function(err){
-      camnote.textContent = 'No se ha podido abrir la cámara (' + (err.name || 'error') +
-        '). Si has abierto el archivo con doble clic, súbelo a un servidor o usa el lector USB.';
+      cam.hidden = true;
+      estado('bad','Cámara no disponible','—','No se ha podido abrir (' + (err.name||'error') + '). Hace falta HTTPS.');
     });
   });
+  document.getElementById('camStop').addEventListener('click', function(){ pararCam(); input.focus(); });
 
-  document.getElementById('cancel').addEventListener('click', function(){
-    parar();
-    input.focus();
+  /* ---------- salida ---------- */
+  window.addEventListener('beforeunload', function(e){
+    guardarYa();
+    if(filas.length){ e.preventDefault(); e.returnValue = ''; }
   });
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'hidden') guardarYa();
+  });
+
+  cargar();
+  pintarTodo();
+  if(filas.length){
+    estado('idle', 'Sesión recuperada', filas.length.toLocaleString('es-ES') + ' cartuchos', 'Sigue donde lo dejaste.');
+  }
 })();
 </script>
 </body>

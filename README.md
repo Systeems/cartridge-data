@@ -1,10 +1,13 @@
-# Fecha del cartucho
+# Cartuchos Memjet
 
-Calcula la fecha de fabricación de un cartucho de tinta Memjet a partir de su número de serie.
+Dos páginas estáticas para trabajar con los números de serie de los cartuchos de tinta Memjet.
 
-Es una página estática de un solo archivo: HTML, CSS y JavaScript embebidos, sin dependencias, sin CDN y sin conexión a internet. Se puede abrir con doble clic o servir desde cualquier sitio.
+- **`index.html`** — estación de escaneo en serie. Registra cientos o miles de cartuchos, rechaza duplicados y P/N, y exporta a Excel.
+- **`fecha.html`** — consulta suelta. Un serial, su fecha de fabricación y el desglose de qué significa cada tramo.
 
-## La regla
+Sin dependencias, sin CDN y sin backend. Todo va embebido en cada archivo.
+
+## La regla del número de serie
 
 Ejemplo real: serial `A2509714161002`, etiqueta `Manufacture Date: Apr.07.2025`.
 
@@ -15,26 +18,45 @@ Ejemplo real: serial `A2509714161002`, etiqueta `Manufacture Date: Apr.07.2025`.
 | 4-6 | `097` | Día del año, contando desde el 1 de enero → 7 de abril. |
 | 7 en adelante | `14161002` | Sin identificar. Se ignoran. |
 
-Con los seis primeros caracteres es suficiente. Si se pega el serial entero, el resto se descarta.
+El día se valida contra el año: 365 días en año normal, 366 en bisiesto. Un día fuera de rango se avisa como error en vez de devolver una fecha inventada.
 
-El día se valida contra el año: en un año no bisiesto el máximo es 365 y en uno bisiesto 366. Un día fuera de rango se avisa como error en vez de devolver una fecha inventada.
+## Cómo se distingue el SN del P/N
 
-## Uso
+La etiqueta lleva dos códigos de barras, el P/N arriba y el SN abajo. Se diferencian sin ambigüedad:
 
-Tres formas de introducir el serial:
+- El **P/N** es solo dígitos (`10009110`).
+- El **SN** empieza por letra seguida de cinco dígitos (`A25097...`).
 
-- **A mano.** Se escribe en el campo y el resultado se recalcula al teclear.
-- **Lector USB de códigos de barras.** Estos lectores actúan como teclado. En escritorio el cursor ya está puesto en el campo al cargar la página, y al enfocarlo se selecciona todo el texto, así que se pueden encadenar cartuchos sin borrar el anterior.
-- **Cámara.** Botón «Escanear con la cámara», usando el detector de códigos que trae el propio navegador. Lee Code 128 (el de la etiqueta), Code 39, ITF y QR.
+Cualquier lectura puramente numérica se rechaza. Aunque el lector apunte al código equivocado, no entra en la lista.
 
-El escaneo con cámara tiene dos límites:
+## Estación de escaneo
 
-- Requiere un contexto seguro. Abriendo el archivo con doble clic (`file://`) el navegador bloquea la cámara. Hay que servirlo por HTTPS o desde `localhost`.
-- Funciona en Chrome y Edge de escritorio y en Chrome para Android. Safari e iOS no llevan la API; ahí el botón no aparece y queda la entrada manual.
+- **Verde**: aceptado, pitido agudo corto.
+- **Ámbar**: repetido, doble pitido, indica cuándo se escaneó la primera vez. No se añade.
+- **Rojo**: P/N o lectura incompleta, pitido grave. No se añade.
+
+Guarda en `localStorage` después de cada escaneo, agrupando escrituras cada 400 ms para que el lector no se frene con miles de filas. Al cerrar la pestaña vuelca lo pendiente y pide confirmación.
+
+La exportación genera un CSV con separador `;` y BOM UTF-8, que es lo que abre el Excel español en columnas y con los acentos correctos sin pasar por el asistente de importación. Columnas: número de serie, fecha de fabricación, día del año, año y momento del escaneo.
+
+## Lector de códigos de barras
+
+Pensado para un lector USB de pistola, que funciona como un teclado y no necesita drivers.
+
+- Configurar el **sufijo Enter (CR)** en el lector. Casi todos lo traen de fábrica; si no, se activa escaneando el código correspondiente del manual. Con Enter, cada lectura se valida al instante.
+- Si el lector no manda Enter, la página lo detecta igual: mide la velocidad de entrada y, si llega en ráfaga, valida sola tras 140 ms de pausa. El tecleo manual sigue esperando a Enter.
+- El foco vuelve al campo de entrada al hacer clic en cualquier parte, así que el lector nunca escribe en el vacío.
+
+## Cámara
+
+Alternativa para móvil, usando el detector de códigos del propio navegador. En la estación de escaneo la cámara queda abierta y va encadenando cartuchos.
+
+- Requiere contexto seguro: HTTPS o `localhost`. Abriendo el archivo con doble clic (`file://`) el navegador bloquea la cámara.
+- Funciona en Chrome y Edge de escritorio y en Chrome para Android. Safari e iOS no llevan la API; ahí el botón no aparece.
+
+Para 3.000 unidades el lector USB es bastante más rápido que el móvil.
 
 ## Desarrollo local
-
-Para probar la cámara sin publicar nada:
 
 ```bash
 python3 -m http.server 8000
@@ -44,11 +66,11 @@ Y abrir `http://localhost:8000`. `localhost` cuenta como contexto seguro aunque 
 
 ## Publicación
 
-El repo está pensado para GitHub Pages sirviendo la raíz de `main`. El archivo se llama `index.html` para que la URL quede limpia.
+Pensado para GitHub Pages sirviendo la raíz de `main`. `index.html` queda como portada.
 
 ## Pendiente
 
-Los dígitos a partir de la posición 7 no están identificados. En el único ejemplo disponible son `14161002`, que podrían ser hora de llenado, línea de producción y contador de unidad, pero hace falta comparar varios cartuchos con fechas de etiqueta distintas para confirmarlo.
+Los dígitos a partir de la posición 7 no están identificados. En el único ejemplo disponible son `14161002`, que podrían ser hora de llenado, línea de producción y contador de unidad. Para confirmarlo hacen falta varios cartuchos con fechas de etiqueta distintas: al escanear el lote de 3.000 habrá material de sobra para deducirlo.
 
 ---
 
