@@ -1,11 +1,8 @@
 # Cartuchos Memjet
 
-Dos páginas estáticas para trabajar con los números de serie de los cartuchos de tinta Memjet.
+Estación de escaneo en serie para los cartuchos de tinta Memjet. Registra cientos o miles de unidades, rechaza duplicados y P/N, muestra la hoja en vivo mientras escaneas y exporta a Excel.
 
-- **`index.html`** — estación de escaneo en serie. Registra cientos o miles de cartuchos, rechaza duplicados y P/N, y exporta a Excel.
-- **`fecha.html`** — consulta suelta. Un serial, su fecha de fabricación y el desglose de qué significa cada tramo.
-
-Sin dependencias, sin CDN y sin backend. Todo va embebido en cada archivo.
+Una sola página estática: sin dependencias, sin CDN y sin backend. Todo va embebido en `index.html`.
 
 ## La regla del número de serie
 
@@ -31,9 +28,15 @@ Cualquier lectura puramente numérica se rechaza. Aunque el lector apunte al có
 
 ## Estación de escaneo
 
+Cada lectura muestra el número de serie, su fecha de fabricación y un veredicto:
+
 - **Verde**: aceptado, pitido agudo corto.
 - **Ámbar**: repetido, doble pitido, indica cuándo se escaneó la primera vez. No se añade.
 - **Rojo**: P/N o lectura incompleta, pitido grave. No se añade.
+
+La hoja de la derecha va en el mismo orden que el archivo exportado: se añade una fila por escaneo, con scroll automático y la última marcada. Al rechazar un repetido, la hoja salta a la fila donde ya estaba ese serial. La × de cada fila la quita y renumera, y deja ese serial libre para volver a escanearlo.
+
+El objetivo de unidades es editable y se guarda. Si se deja vacío, desaparece la barra de progreso y queda solo el contador.
 
 Guarda en `localStorage` después de cada escaneo, agrupando escrituras cada 400 ms para que el lector no se frene con miles de filas. Al cerrar la pestaña vuelca lo pendiente y pide confirmación.
 
@@ -49,7 +52,7 @@ Pensado para un lector USB de pistola, que funciona como un teclado y no necesit
 
 ## Cámara
 
-Alternativa para móvil, usando el detector de códigos del propio navegador. En la estación de escaneo la cámara queda abierta y va encadenando cartuchos.
+Alternativa para móvil, usando el detector de códigos del propio navegador. La cámara queda abierta y va encadenando cartuchos.
 
 - Requiere contexto seguro: HTTPS o `localhost`. Abriendo el archivo con doble clic (`file://`) el navegador bloquea la cámara.
 - Funciona en Chrome y Edge de escritorio y en Chrome para Android. Safari e iOS no llevan la API; ahí el botón no aparece.
@@ -66,7 +69,7 @@ Y abrir `http://localhost:8000`. `localhost` cuenta como contexto seguro aunque 
 
 ## Publicación
 
-Pensado para GitHub Pages sirviendo la raíz de `main`. `index.html` queda como portada.
+Publicado con GitHub Pages desde la raíz de `main`: https://systeems.github.io/cartridge-data
 
 ## Pendiente
 
