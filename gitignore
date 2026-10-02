@@ -1,0 +1,7 @@
+# Exportaciones: contienen datos de inventario, no se versionan
+*.csv
+*.xlsx
+
+# Sistema
+.DS_Store
+Thumbs.db

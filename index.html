@@ -150,7 +150,7 @@
     <h1>Escaneo de cartuchos</h1>
     <a class="goto" href="fecha.html">Consultar una fecha</a>
   </div>
-  <p class="intro">Escanea el código de debajo de «Serial Number». Los P/N y los repetidos se rechazan solos, también si el repetido viene de un lote anterior.</p>
+  <p class="intro">Escanea el código del número de serie. Lo que no lo sea y los repetidos se rechazan solos, también si el repetido viene de una tanda anterior.</p>
 
   <div class="layout">
     <section>
@@ -162,11 +162,11 @@
 
       <div class="lote">
         <label for="lote">Lote</label>
-        <input id="lote" type="text" maxlength="40" autocomplete="off" placeholder="P/N o nombre del modelo, por ejemplo 10009110">
+        <input id="lote" type="text" maxlength="40" autocomplete="off" placeholder="Referencia del modelo o nombre de la tanda">
       </div>
 
       <div class="entry">
-        <input id="serial" type="text" autocomplete="off" spellcheck="false" placeholder="A2509714161002"
+        <input id="serial" type="text" autocomplete="off" spellcheck="false" placeholder="A26120000000"
                aria-label="Número de serie">
         <button class="btn" id="add" type="button">Añadir</button>
         <button class="btn quiet" id="camBtn" type="button" hidden>Cámara</button>
@@ -280,7 +280,7 @@
   function decodificar(bruto){
     var s = String(bruto).toUpperCase().replace(/[^A-Z0-9]/g,'');
     if(!s) return {ko:'vacio'};
-    if(/^\d+$/.test(s)) return {ko:'pn', msg:'Eso es el P/N. Apunta al código de debajo de «Serial Number».'};
+    if(/^\d+$/.test(s)) return {ko:'pn', msg:'Ese código no es un número de serie. Apunta al otro código de la etiqueta.'};
     if(s.length < 6) return {ko:'formato', msg:'Lectura incompleta: solo han llegado ' + s.length + ' caracteres.'};
     if(!/^[A-Z]\d{5}/.test(s)) return {ko:'formato', msg:'No tiene forma de número de serie: debe empezar por una letra y cinco dígitos.'};
     var anio = 2000 + parseInt(s.substring(1,3),10);
@@ -382,7 +382,7 @@
     var r = [];
     if(rechazos.dup) r.push(rechazos.dup + ' repetidos de esta hoja');
     if(rechazos.hist) r.push(rechazos.hist + ' ya registrados en lotes anteriores');
-    if(rechazos.pn) r.push(rechazos.pn + ' lecturas de P/N');
+    if(rechazos.pn) r.push(rechazos.pn + ' códigos que no son un serial');
     if(rechazos.formato) r.push(rechazos.formato + ' lecturas con formato raro');
     var linea = r.length ? 'Rechazados: ' + r.join(', ') + '.' : 'Sin rechazos todavía.';
     if(obj){
@@ -593,7 +593,7 @@
       stream = s; video.srcObject = s; return video.play();
     }).then(function(){
       corriendo = true; bucle();
-      estado('idle','Cámara abierta','—','Enfoca el código de debajo de «Serial Number». Sigue escaneando sin cerrar.');
+      estado('idle','Cámara abierta','—','Enfoca el código del número de serie. Sigue escaneando sin cerrar.');
     }).catch(function(err){
       cam.hidden = true;
       estado('bad','Cámara no disponible','—','No se ha podido abrir (' + (err.name||'error') + '). Hace falta HTTPS.');
