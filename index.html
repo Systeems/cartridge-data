@@ -8,11 +8,12 @@
   :root{
     --paper:#E7EAED;
     --card:#FFFFFF;
+    --head:#F2F4F6;
     --ink:#15181D;
     --muted:#5D6673;
     --line:#D6DBE0;
+    --hair:#EBEEF1;
     --cyan:#00A3C8;
-    --magenta:#CE0069;
     --ok:#0B7A4B;
     --dup:#A86300;
     --bad:#B3261E;
@@ -26,11 +27,14 @@
     line-height:1.5;display:flex;justify-content:center;
     padding:26px 16px 60px;-webkit-font-smoothing:antialiased;
   }
-  .sheet{width:100%;max-width:620px}
+  .sheet{width:100%;max-width:1060px}
   h1{font-size:1.45rem;letter-spacing:-.02em;font-weight:700;margin:0 0 4px}
-  .intro{margin:0 0 20px;color:var(--muted);font-size:.92rem;max-width:52ch}
+  .intro{margin:0 0 22px;color:var(--muted);font-size:.92rem;max-width:58ch}
   .nav{color:var(--muted);text-underline-offset:3px;white-space:nowrap}
   .nav:hover{color:var(--ink)}
+
+  .layout{display:grid;gap:22px;align-items:start}
+  @media (min-width:900px){ .layout{grid-template-columns:minmax(0,1fr) minmax(330px,400px)} }
 
   /* --- banda de estado --- */
   .band{
@@ -48,11 +52,10 @@
   .band[data-state="bad"]{--state:var(--bad);background:#FDF3F2}
   .verdict{font-size:1.15rem;font-weight:700;margin:0 0 6px;color:var(--state)}
   .band[data-state="idle"] .verdict{color:var(--muted);font-weight:600}
-  .sn{font-family:var(--mono);font-size:clamp(1.3rem,5vw,1.75rem);letter-spacing:.07em;margin:0 0 4px;word-break:break-all}
+  .sn{font-family:var(--mono);font-size:clamp(1.3rem,4.4vw,1.7rem);letter-spacing:.07em;margin:0 0 4px;word-break:break-all}
   .detail{margin:0;color:var(--muted);font-size:.93rem}
   .flash{animation:pop .18s ease-out}
   @keyframes pop{from{transform:scale(.988)}to{transform:none}}
-  @media (prefers-reduced-motion:reduce){.flash{animation:none}}
 
   /* --- entrada --- */
   .entry{margin-top:16px;display:flex;gap:9px}
@@ -66,46 +69,66 @@
     font:inherit;font-size:.9rem;font-weight:600;padding:0 17px;
     border:1.5px solid var(--ink);border-radius:10px;background:var(--ink);color:#fff;cursor:pointer;flex:none;
   }
-  .btn.quiet{background:var(--card);color:var(--ink);border-color:var(--line)}
-  .btn.quiet:hover{border-color:var(--ink)}
   .btn:hover{background:#000}
-  .btn.quiet:hover{background:var(--card)}
+  .btn.quiet{background:var(--card);color:var(--ink);border-color:var(--line)}
+  .btn.quiet:hover{background:var(--card);border-color:var(--ink)}
   .btn[hidden]{display:none}
-  .btn:focus-visible,.link:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
+  .btn:focus-visible,.link:focus-visible,.goal input:focus-visible{outline:2.5px solid var(--cyan);outline-offset:3px}
 
   /* --- contador --- */
   .count{display:flex;align-items:baseline;gap:10px;margin:22px 0 6px;flex-wrap:wrap}
   .total{font-size:2.4rem;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
   .goal{color:var(--muted);font-size:.95rem}
   .goal input{
-    width:62px;font:inherit;font-variant-numeric:tabular-nums;padding:2px 5px;
-    border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);
+    width:86px;font:inherit;font-size:1.05rem;font-weight:600;text-align:center;
+    font-variant-numeric:tabular-nums;padding:4px 6px;cursor:text;
+    border:1.5px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);
   }
+  .goal input:hover{border-color:var(--muted)}
   .track{height:5px;background:var(--line);border-radius:3px;overflow:hidden}
+  .track[hidden]{display:none}
   .fill{height:100%;background:var(--ink);width:0;transition:width .3s ease}
-  @media (prefers-reduced-motion:reduce){.fill{transition:none}}
   .tally{margin:9px 0 0;color:var(--muted);font-size:.85rem}
 
-  /* --- lista --- */
-  h2{font-size:.85rem;font-weight:600;margin:28px 0 9px}
-  table{width:100%;border-collapse:collapse;font-size:.88rem}
-  th{text-align:left;font-weight:600;color:var(--muted);font-size:.78rem;padding:0 0 7px;border-bottom:1px solid var(--line)}
-  th.r,td.r{text-align:right}
-  td{padding:9px 0;border-bottom:1px solid var(--line);vertical-align:baseline}
-  td.code{font-family:var(--mono);letter-spacing:.05em}
-  td.when{color:var(--muted);font-variant-numeric:tabular-nums}
-  .link{background:none;border:0;padding:2px 4px;color:var(--muted);font:inherit;font-size:.82rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-  .link:hover{color:var(--bad)}
-  .empty{color:var(--muted);font-size:.9rem;margin:14px 0 0}
-  .more{color:var(--muted);font-size:.82rem;margin:10px 0 0}
-
-  .tools{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+  .tools{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
   .tools .btn{padding:10px 17px}
   .note{margin:16px 0 0;color:var(--muted);font-size:.8rem;line-height:1.55;max-width:58ch}
 
   .cam{margin-top:14px}
   .cam[hidden]{display:none}
   video{width:100%;max-height:240px;object-fit:cover;border-radius:12px;background:#111;display:block}
+
+  /* --- hoja --- */
+  .hojaTop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 8px}
+  h2{font-size:.88rem;font-weight:600;margin:0}
+  .rows{color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
+  .grid{
+    border:1px solid var(--line);border-radius:10px;background:var(--card);
+    overflow:auto;max-height:62vh;
+  }
+  @media (max-width:899px){ .grid{max-height:44vh} }
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:.85rem}
+  thead th{
+    position:sticky;top:0;z-index:2;background:var(--head);
+    text-align:left;font-weight:600;color:var(--muted);font-size:.75rem;
+    padding:8px 9px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  thead th.num{width:48px;text-align:right;border-right:1px solid var(--line)}
+  tbody td{padding:7px 9px;border-bottom:1px solid var(--hair);vertical-align:baseline}
+  tbody td.num{
+    width:48px;text-align:right;color:var(--muted);background:var(--head);
+    border-right:1px solid var(--line);font-variant-numeric:tabular-nums;font-size:.78rem;
+  }
+  td.code{font-family:var(--mono);letter-spacing:.04em;white-space:nowrap}
+  td.made{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.act{width:30px;text-align:right}
+  tr.nuevo td{background:#EDF8F2}
+  tr.nuevo td.num{background:#DFF0E7}
+  .link{background:none;border:0;padding:1px 3px;color:var(--muted);font:inherit;font-size:1rem;line-height:1;cursor:pointer;border-radius:4px}
+  .link:hover{color:var(--bad)}
+  .vacio{padding:18px 12px;color:var(--muted);font-size:.86rem;margin:0}
+
+  @media (prefers-reduced-motion:reduce){.flash,.fill{animation:none;transition:none}}
 </style>
 </head>
 <body>
@@ -114,48 +137,62 @@
   <p class="intro">Escanea el código de debajo de «Serial Number». Los P/N y los repetidos se rechazan solos.
     <a class="nav" href="fecha.html">Consultar un cartucho suelto</a></p>
 
-  <div class="band" id="band" data-state="idle">
-    <p class="verdict" id="verdict">Listo para escanear</p>
-    <p class="sn" id="sn">—</p>
-    <p class="detail" id="detail">El cursor está en el campo. Dispara el lector y empieza.</p>
-  </div>
+  <div class="layout">
+    <section>
+      <div class="band" id="band" data-state="idle">
+        <p class="verdict" id="verdict">Listo para escanear</p>
+        <p class="sn" id="sn">—</p>
+        <p class="detail" id="detail">El cursor está en el campo. Dispara el lector y empieza.</p>
+      </div>
 
-  <div class="entry">
-    <input id="serial" type="text" autocomplete="off" spellcheck="false" placeholder="A2509714161002"
-           aria-label="Número de serie">
-    <button class="btn" id="add" type="button">Añadir</button>
-    <button class="btn quiet" id="camBtn" type="button" hidden>Cámara</button>
-  </div>
+      <div class="entry">
+        <input id="serial" type="text" autocomplete="off" spellcheck="false" placeholder="A2509714161002"
+               aria-label="Número de serie">
+        <button class="btn" id="add" type="button">Añadir</button>
+        <button class="btn quiet" id="camBtn" type="button" hidden>Cámara</button>
+      </div>
 
-  <div class="cam" id="cam" hidden>
-    <video id="video" playsinline muted></video>
-    <div class="tools">
-      <button class="btn quiet" id="camStop" type="button">Cerrar cámara</button>
-    </div>
-  </div>
+      <div class="cam" id="cam" hidden>
+        <video id="video" playsinline muted></video>
+        <div class="tools"><button class="btn quiet" id="camStop" type="button">Cerrar cámara</button></div>
+      </div>
 
-  <div class="count">
-    <span class="total" id="total">0</span>
-    <span class="goal">de <input id="goal" type="text" inputmode="numeric" value="3000" aria-label="Objetivo"> cartuchos</span>
-  </div>
-  <div class="track"><div class="fill" id="fill"></div></div>
-  <p class="tally" id="tally">Sin rechazos todavía.</p>
+      <div class="count">
+        <span class="total" id="total">0</span>
+        <span class="goal">de <input id="goal" type="text" inputmode="numeric" maxlength="7" value="3000"
+          aria-label="Cuántos cartuchos hay que escanear"> cartuchos<span id="goalOff" hidden>, sin objetivo fijado</span></span>
+      </div>
+      <div class="track" id="track"><div class="fill" id="fill"></div></div>
+      <p class="tally" id="tally">Sin rechazos todavía.</p>
 
-  <h2>Últimos escaneos</h2>
-  <div id="listWrap">
-    <p class="empty">Todavía no hay ninguno.</p>
-  </div>
+      <div class="tools">
+        <button class="btn" id="export" type="button">Exportar a Excel</button>
+        <button class="btn quiet" id="sound" type="button">Sonido: activado</button>
+        <button class="btn quiet" id="wipe" type="button">Borrar todo</button>
+      </div>
 
-  <div class="tools">
-    <button class="btn" id="export" type="button">Exportar a Excel</button>
-    <button class="btn quiet" id="sound" type="button">Sonido: activado</button>
-    <button class="btn quiet" id="wipe" type="button">Borrar todo</button>
-  </div>
+      <p class="note">
+        Todo se guarda en este navegador después de cada escaneo, así que puedes cerrar y seguir mañana.
+        Aun así exporta cada rato: si alguien borra los datos de navegación, se pierde.
+      </p>
+    </section>
 
-  <p class="note">
-    Todo se guarda en este navegador después de cada escaneo, así que puedes cerrar y seguir mañana.
-    Aun así exporta cada rato: si alguien borra los datos de navegación, se pierde.
-  </p>
+    <aside>
+      <div class="hojaTop">
+        <h2>Hoja en curso</h2>
+        <span class="rows" id="rows">0 filas</span>
+      </div>
+      <div class="grid" id="grid">
+        <table>
+          <thead>
+            <tr><th class="num">#</th><th>Número de serie</th><th>Fabricación</th><th></th></tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <p class="vacio" id="vacio">Las filas aparecerán aquí, en el mismo orden que el archivo exportado.</p>
+      </div>
+    </aside>
+  </div>
 </main>
 
 <script>
@@ -170,13 +207,18 @@
   var detail = document.getElementById('detail');
   var totalEl = document.getElementById('total');
   var fill = document.getElementById('fill');
+  var track = document.getElementById('track');
   var tally = document.getElementById('tally');
-  var listWrap = document.getElementById('listWrap');
   var goalEl = document.getElementById('goal');
+  var goalOff = document.getElementById('goalOff');
   var soundBtn = document.getElementById('sound');
+  var tbody = document.getElementById('tbody');
+  var grid = document.getElementById('grid');
+  var vacio = document.getElementById('vacio');
+  var rowsEl = document.getElementById('rows');
 
-  var filas = [];          // {sn, anio, dia, iso, ts}
-  var indice = {};         // sn -> ts del primero
+  var filas = [];
+  var indice = {};
   var rechazos = {pn:0, formato:0, dup:0};
   var sonido = true;
 
@@ -190,18 +232,14 @@
       detail.textContent = 'Aviso: este navegador no está guardando. Exporta ahora.';
     }
   }
-  // con miles de filas serializar en cada disparo frenaría el lector: se agrupa
-  function guardar(){
-    if(pendiente) return;
-    pendiente = setTimeout(guardarYa, 400);
-  }
+  function guardar(){ if(!pendiente) pendiente = setTimeout(guardarYa, 400); }
   function cargar(){
     try{
       var d = JSON.parse(localStorage.getItem(CLAVE) || 'null');
       if(d && d.filas){
         filas = d.filas;
         rechazos = d.rechazos || rechazos;
-        if(d.objetivo) goalEl.value = d.objetivo;
+        if(d.objetivo !== undefined) goalEl.value = d.objetivo;
         filas.forEach(function(f){ indice[f.sn] = f.ts; });
       }
     }catch(e){}
@@ -212,7 +250,7 @@
 
   function decodificar(bruto){
     var s = String(bruto).toUpperCase().replace(/[^A-Z0-9]/g,'');
-    if(!s) return {ko:'vacio', msg:'No ha llegado nada.'};
+    if(!s) return {ko:'vacio'};
     if(/^\d+$/.test(s)) return {ko:'pn', msg:'Eso es el P/N. Apunta al código de debajo de «Serial Number».'};
     if(s.length < 6) return {ko:'formato', msg:'Lectura incompleta: solo han llegado ' + s.length + ' caracteres.'};
     if(!/^[A-Z]\d{5}/.test(s)) return {ko:'formato', msg:'No tiene forma de número de serie: debe empezar por una letra y cinco dígitos.'};
@@ -222,20 +260,24 @@
     if(dia < 1 || dia > tope) return {ko:'formato', msg:'El día ' + s.substring(3,6) + ' no existe en ' + anio + '.'};
     var f = new Date(Date.UTC(anio,0,dia));
     return {
-      sn:s, anio:anio, dia:dia, fecha:f,
+      sn:s, anio:anio, dia:dia,
       texto: f.getUTCDate() + ' de ' + MESES[f.getUTCMonth()] + ' de ' + f.getUTCFullYear(),
-      iso: f.getUTCFullYear() + '-' + String(f.getUTCMonth()+1).padStart(2,'0') + '-' + String(f.getUTCDate()).padStart(2,'0')
+      iso: f.getUTCFullYear() + '-' + String(f.getUTCMonth()+1).padStart(2,'0') + '-' + String(f.getUTCDate()).padStart(2,'0'),
+      esp: String(f.getUTCDate()).padStart(2,'0') + '/' + String(f.getUTCMonth()+1).padStart(2,'0') + '/' + f.getUTCFullYear()
     };
   }
 
+  function espDesdeIso(iso){
+    var p = iso.split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
   function hora(ts){
     var d = new Date(ts);
     return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
   }
   function fechaHora(ts){
     var d = new Date(ts);
-    return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' +
-           d.getFullYear() + ' ' + hora(ts);
+    return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear() + ' ' + hora(ts);
   }
 
   /* ---------- sonido ---------- */
@@ -261,7 +303,7 @@
     }catch(e){}
   }
 
-  /* ---------- pintar ---------- */
+  /* ---------- banda ---------- */
   function estado(tipo, titulo, codigo, texto){
     band.setAttribute('data-state', tipo);
     verdict.textContent = titulo;
@@ -272,32 +314,55 @@
     band.classList.add('flash');
   }
 
-  function pintarTodo(){
+  /* ---------- hoja ---------- */
+  function crearFila(f, n){
+    var tr = document.createElement('tr');
+    tr.setAttribute('data-sn', f.sn);
+    tr.innerHTML = '<td class="num">' + n + '</td>' +
+                   '<td class="code">' + f.sn + '</td>' +
+                   '<td class="made">' + espDesdeIso(f.iso) + '</td>' +
+                   '<td class="act"><button class="link" type="button" title="Quitar esta fila" aria-label="Quitar ' + f.sn + '">&times;</button></td>';
+    return tr;
+  }
+
+  function reconstruirHoja(){
+    tbody.innerHTML = '';
+    var frag = document.createDocumentFragment();
+    filas.forEach(function(f, i){ frag.appendChild(crearFila(f, i+1)); });
+    tbody.appendChild(frag);
+    vacio.hidden = filas.length > 0;
+    rowsEl.textContent = filas.length.toLocaleString('es-ES') + (filas.length === 1 ? ' fila' : ' filas');
+    grid.scrollTop = grid.scrollHeight;
+  }
+
+  function anadirAHoja(f){
+    var anterior = tbody.querySelector('tr.nuevo');
+    if(anterior) anterior.classList.remove('nuevo');
+    var tr = crearFila(f, filas.length);
+    tr.classList.add('nuevo');
+    tbody.appendChild(tr);
+    vacio.hidden = true;
+    rowsEl.textContent = filas.length.toLocaleString('es-ES') + ' filas';
+    grid.scrollTop = grid.scrollHeight;
+  }
+
+  /* ---------- contador ---------- */
+  function pintarContador(){
     totalEl.textContent = filas.length.toLocaleString('es-ES');
     var obj = parseInt(String(goalEl.value).replace(/\D/g,''),10) || 0;
+    track.hidden = !obj;
+    goalOff.hidden = !!obj;
     fill.style.width = obj ? Math.min(100, filas.length / obj * 100) + '%' : '0';
 
     var r = [];
     if(rechazos.dup) r.push(rechazos.dup + ' repetidos');
     if(rechazos.pn) r.push(rechazos.pn + ' lecturas de P/N');
     if(rechazos.formato) r.push(rechazos.formato + ' lecturas con formato raro');
-    tally.textContent = r.length ? 'Rechazados: ' + r.join(', ') + '.' : 'Sin rechazos todavía.';
-
-    if(!filas.length){
-      listWrap.innerHTML = '<p class="empty">Todavía no hay ninguno.</p>';
-      return;
+    var linea = r.length ? 'Rechazados: ' + r.join(', ') + '.' : 'Sin rechazos todavía.';
+    if(obj){
+      linea = (filas.length >= obj ? 'Objetivo alcanzado. ' : 'Faltan ' + (obj - filas.length).toLocaleString('es-ES') + '. ') + linea;
     }
-    var ultimos = filas.slice(-12).reverse();
-    var html = '<table><thead><tr><th>Número de serie</th><th>Fabricación</th><th class="r">Escaneado</th><th></th></tr></thead><tbody>';
-    ultimos.forEach(function(f){
-      html += '<tr><td class="code">' + f.sn + '</td>' +
-              '<td>' + f.iso + '</td>' +
-              '<td class="when r">' + hora(f.ts) + '</td>' +
-              '<td class="r"><button class="link" data-sn="' + f.sn + '">Quitar</button></td></tr>';
-    });
-    html += '</tbody></table>';
-    if(filas.length > 12) html += '<p class="more">Y ' + (filas.length-12).toLocaleString('es-ES') + ' más, todos incluidos en la exportación.</p>';
-    listWrap.innerHTML = html;
+    tally.textContent = linea;
   }
 
   /* ---------- registrar ---------- */
@@ -310,25 +375,28 @@
         estado('bad', 'Rechazado', String(bruto).toUpperCase().slice(0,24) || '—', r.msg);
         pitar('bad');
       }
-      guardar(); pintarTodo();
+      guardar(); pintarContador();
       return;
     }
     if(indice[r.sn]){
       rechazos.dup++;
       estado('dup', 'Repetido', r.sn, 'Ya lo escaneaste el ' + fechaHora(indice[r.sn]) + '. No se ha añadido.');
       pitar('dup');
-      guardar(); pintarTodo();
+      var ya = tbody.querySelector('tr[data-sn="' + r.sn + '"]');
+      if(ya) ya.scrollIntoView({block:'center'});
+      guardar(); pintarContador();
       return;
     }
     var ts = Date.now();
     filas.push({sn:r.sn, anio:r.anio, dia:r.dia, iso:r.iso, ts:ts});
     indice[r.sn] = ts;
+    anadirAHoja(filas[filas.length-1]);
     estado('ok', 'Añadido, ' + filas.length.toLocaleString('es-ES') + ' en total', r.sn, 'Fabricado el ' + r.texto + '.');
     pitar('ok');
-    guardar(); pintarTodo();
+    guardar(); pintarContador();
   }
 
-  /* ---------- entrada por teclado y lector ---------- */
+  /* ---------- entrada ---------- */
   var primerTecla = 0, temporizador = null;
 
   function enviar(){
@@ -343,39 +411,45 @@
     if(e.key === 'Enter'){ e.preventDefault(); enviar(); return; }
     if(!primerTecla) primerTecla = Date.now();
   });
-
   input.addEventListener('input', function(){
     clearTimeout(temporizador);
     var txt = input.value.replace(/\s/g,'');
     if(txt.length < 6 || !primerTecla) return;
-    var porCaracter = (Date.now() - primerTecla) / txt.length;
-    // ráfaga rápida = lector sin Enter configurado; tecleo humano espera a Enter
-    if(porCaracter < 35) temporizador = setTimeout(enviar, 140);
+    if((Date.now() - primerTecla) / txt.length < 35) temporizador = setTimeout(enviar, 140);
   });
-
   document.getElementById('add').addEventListener('click', enviar);
 
-  // el lector escribe donde esté el foco: lo devolvemos al campo
   document.addEventListener('click', function(e){
     var t = e.target;
-    if(t.tagName === 'BUTTON' || t.tagName === 'INPUT' || t.tagName === 'VIDEO') return;
+    if(t.tagName === 'BUTTON' || t.tagName === 'INPUT' || t.tagName === 'VIDEO' || t.tagName === 'A') return;
     input.focus();
   });
   input.focus();
 
-  /* ---------- quitar una fila ---------- */
-  listWrap.addEventListener('click', function(e){
+  /* ---------- quitar fila ---------- */
+  tbody.addEventListener('click', function(e){
     var b = e.target.closest('.link');
     if(!b) return;
-    var sn = b.getAttribute('data-sn');
+    var sn = b.closest('tr').getAttribute('data-sn');
     filas = filas.filter(function(f){ return f.sn !== sn; });
     delete indice[sn];
     estado('idle', 'Quitado', sn, 'Se puede volver a escanear.');
-    guardar(); pintarTodo(); input.focus();
+    guardarYa(); reconstruirHoja(); pintarContador(); input.focus();
   });
 
   /* ---------- objetivo ---------- */
-  goalEl.addEventListener('input', function(){ guardar(); pintarTodo(); });
+  var vueltaFoco = null;
+  goalEl.addEventListener('input', function(){
+    var limpio = goalEl.value.replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+    if(limpio !== goalEl.value) goalEl.value = limpio;
+    guardar(); pintarContador();
+    clearTimeout(vueltaFoco);
+    vueltaFoco = setTimeout(function(){ input.focus(); }, 6000);
+  });
+  goalEl.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); clearTimeout(vueltaFoco); input.focus(); }
+  });
+  goalEl.addEventListener('focus', function(){ goalEl.select(); });
 
   /* ---------- sonido ---------- */
   soundBtn.addEventListener('click', function(){
@@ -390,17 +464,13 @@
     if(!filas.length){ estado('bad','Nada que exportar','—','Escanea al menos un cartucho.'); return; }
     var lineas = ['Numero de serie;Fecha de fabricacion;Dia del año;Año;Escaneado el'];
     filas.forEach(function(f){
-      var d = new Date(f.iso + 'T00:00:00Z');
-      var esp = String(d.getUTCDate()).padStart(2,'0') + '/' + String(d.getUTCMonth()+1).padStart(2,'0') + '/' + d.getUTCFullYear();
-      lineas.push([f.sn, esp, f.dia, f.anio, fechaHora(f.ts)].join(';'));
+      lineas.push([f.sn, espDesdeIso(f.iso), f.dia, f.anio, fechaHora(f.ts)].join(';'));
     });
     var blob = new Blob(['\ufeff' + lineas.join('\r\n')], {type:'text/csv;charset=utf-8;'});
     var a = document.createElement('a');
     var hoy = new Date();
     a.href = URL.createObjectURL(blob);
-    a.download = 'cartuchos-' + hoy.getFullYear() +
-                 String(hoy.getMonth()+1).padStart(2,'0') +
-                 String(hoy.getDate()).padStart(2,'0') + '.csv';
+    a.download = 'cartuchos-' + hoy.getFullYear() + String(hoy.getMonth()+1).padStart(2,'0') + String(hoy.getDate()).padStart(2,'0') + '.csv';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
     estado('ok', 'Exportado', filas.length.toLocaleString('es-ES') + ' cartuchos', 'Ábrelo con Excel. Los datos siguen aquí por si quieres continuar.');
@@ -412,7 +482,7 @@
     if(!filas.length) return;
     if(!confirm('Vas a borrar ' + filas.length + ' cartuchos. ¿Los has exportado ya?')) return;
     filas = []; indice = {}; rechazos = {pn:0, formato:0, dup:0};
-    guardar(); pintarTodo();
+    guardarYa(); reconstruirHoja(); pintarContador();
     estado('idle', 'Listo para escanear', '—', 'La lista está vacía.');
     input.focus();
   });
@@ -431,7 +501,6 @@
     video.srcObject = null;
     cam.hidden = true;
   }
-
   function bucle(){
     if(!corriendo) return;
     detector.detect(video).then(function(c){
@@ -448,7 +517,6 @@
       requestAnimationFrame(bucle);
     }).catch(function(){ if(corriendo) requestAnimationFrame(bucle); });
   }
-
   camBtn.addEventListener('click', function(){
     cam.hidden = false;
     try{ detector = new BarcodeDetector({formats:['code_128','code_39','itf','codabar']}); }
@@ -475,7 +543,8 @@
   });
 
   cargar();
-  pintarTodo();
+  reconstruirHoja();
+  pintarContador();
   if(filas.length){
     estado('idle', 'Sesión recuperada', filas.length.toLocaleString('es-ES') + ' cartuchos', 'Sigue donde lo dejaste.');
   }
